@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fee Schedule Lookup</title>
+</head>
+<body>
+    <h1>Fee Schedule Rate Lookup</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label>State:
+            <select name="state">
+                {% for s in states %}
+                <option value="{{ s.state_code }}">{{ s.state_name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Procedure Code:
+            <select name="procedure_code">
+                {% for code in codes %}
+                <option value="{{ code.procedure_code }}">{{ code.procedure_code }} - {{ code.description }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>ZIP Code: <input type="text" name="zip_code"></label>
+        <input type="submit" value="Lookup">
+    </form>
+    {% if rates %}
+        <h2>Results</h2>
+        <ul>
+        {% for r in rates %}
+            <li>{{ r.procedure_code }} | {{ r.rate }} | {{ r.rate_unit }} | {{ r.region.region_name }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html> 
