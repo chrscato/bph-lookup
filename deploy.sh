@@ -45,11 +45,11 @@ fi
 # Step 1: Copy non-git files (database, settings, etc.)
 echo -e "${BLUE}📤 Copying non-git files to VM...${NC}"
 
-# Copy database file if it exists
+# Skip large database file - handle separately
 if [ -f "compensation_rates.db" ]; then
-    echo "Copying database file..."
-    scp compensation_rates.db $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/
-    check_status "Database file copied"
+    db_size=$(du -h compensation_rates.db | cut -f1)
+    echo -e "${YELLOW}⚠️  Skipping database file copy (${db_size}) - too large for regular deployment${NC}"
+    echo -e "${BLUE}💡 Use: scp compensation_rates.db $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/ to copy separately${NC}"
 fi
 
 # Copy settings file if it exists
@@ -79,7 +79,7 @@ if [ -n "$(git diff --staged)" ]; then
     check_status "Local commit created"
 fi
 
-git push origin master
+git push origin main
 check_status "Code pushed to repository"
 
 # Step 3: Deploy on VM
@@ -101,7 +101,7 @@ cd $REMOTE_DIR
 
 # Pull latest code
 echo -e "${BLUE}📥 Pulling latest code...${NC}"
-git pull origin master
+git pull origin main
 
 # Create virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
