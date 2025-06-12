@@ -79,7 +79,9 @@ if [ -n "$(git diff --staged)" ]; then
     check_status "Local commit created"
 fi
 
-git push origin master
+# Get current branch name
+current_branch=$(git branch --show-current)
+git push origin $current_branch
 check_status "Code pushed to repository"
 
 # Step 3: Deploy on VM
@@ -101,7 +103,7 @@ cd $REMOTE_DIR
 
 # Pull latest code
 echo -e "${BLUE}📥 Pulling latest code...${NC}"
-git pull origin master
+git pull origin $(git branch --show-current)
 
 # Create virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
@@ -117,9 +119,10 @@ pip install -r requirements.txt
 
 # Django setup
 echo -e "${BLUE}🗃️  Running Django setup...${NC}"
-python manage.py makemigrations
-python manage.py migrate
-python manage.py collectstatic --noinput
+cd bph_lookup
+python ../venv/bin/python manage.py makemigrations
+python ../venv/bin/python manage.py migrate
+python ../venv/bin/python manage.py collectstatic --noinput
 
 # Check if service exists, if not create it
 if [ ! -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
@@ -132,10 +135,10 @@ After=network.target
 [Service]
 Type=exec
 User=root
-WorkingDirectory=/opt/bph_lookup
+WorkingDirectory=/opt/bph_lookup/bph_lookup
 Environment=PATH=/opt/bph_lookup/venv/bin
 EnvironmentFile=/opt/bph_lookup/.env
-ExecStart=/opt/bph_lookup/venv/bin/python manage.py runserver 0.0.0.0:8000
+ExecStart=/opt/bph_lookup/venv/bin/python /opt/bph_lookup/bph_lookup/manage.py runserver 0.0.0.0:8000
 Restart=always
 RestartSec=3
 
