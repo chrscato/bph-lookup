@@ -119,10 +119,12 @@ pip install -r requirements.txt
 
 # Django setup
 echo -e "${BLUE}🗃️  Running Django setup...${NC}"
+source venv/bin/activate
 cd bph_lookup
-python ../venv/bin/python manage.py makemigrations
-python ../venv/bin/python manage.py migrate
-python ../venv/bin/python manage.py collectstatic --noinput
+python manage.py makemigrations
+python manage.py migrate
+python manage.py collectstatic --noinput
+cd ..
 
 # Check if service exists, if not create it
 if [ ! -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
