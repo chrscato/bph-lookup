@@ -3,12 +3,12 @@ from django.db import connection
 from django.contrib import messages
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .forms import MedicareRateLookupForm
+from .forms import MedicareRateLookupForm, WorkersCompRateLookupForm
 
 from .models import State, ProcedureCode, FeeScheduleRate, Region
 from .serializers import FeeScheduleRateSerializer
 
-def rate_lookup(request):
+def rate_lookup(request, template_name="core/medicare_rate_lookup.html"):
     """
     Medicare rate lookup: User enters ZIP code and CPT code.
     Returns calculated Medicare allowed amount based on GPCI, RVU, and conversion factor.
@@ -56,7 +56,47 @@ def rate_lookup(request):
         else:
             messages.error(request, 'Please correct the errors below.')
 
-    return render(request, "core/medicare_rate_lookup.html", context)
+    return render(request, template_name, context)
+
+
+def home(request):
+    """Landing page with introductory text and quick Medicare lookup."""
+    return rate_lookup(request, template_name="core/home.html")
+
+
+def workers_comp_lookup(request, template_name="core/workers_comp_rate_lookup.html"):
+    """Workers' compensation fee schedule lookup by state and CPT code."""
+    form = WorkersCompRateLookupForm()
+    context = {"form": form}
+
+    if request.method == "POST":
+        form = WorkersCompRateLookupForm(request.POST)
+        if form.is_valid():
+            state = form.cleaned_data["state"]
+            procedure_code = form.cleaned_data["procedure_code"]
+
+            try:
+                rate = (
+                    FeeScheduleRate.objects
+                    .select_related("fee_schedule", "procedure_code", "region")
+                    .filter(
+                        fee_schedule__state=state,
+                        procedure_code__procedure_code=procedure_code,
+                    )
+                    .order_by("-fee_schedule__effective_date")
+                    .first()
+                )
+                if rate:
+                    context["rate"] = rate
+                    messages.success(request, "Rate lookup completed successfully.")
+                else:
+                    messages.warning(request, "No results found for the given state and procedure code.")
+            except Exception as e:
+                messages.error(request, f"Error retrieving rate: {str(e)}")
+        else:
+            messages.error(request, "Please correct the errors below.")
+
+    return render(request, template_name, context)
 
 
 @api_view(["GET"])

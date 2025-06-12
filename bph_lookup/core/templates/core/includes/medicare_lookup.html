@@ -1,0 +1,117 @@
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<div class="medicare-form">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.zip_code.id_for_label }}">ZIP Code</label>
+            {{ form.zip_code }}
+            {% if form.zip_code.errors %}
+            <ul class="errorlist">
+                {% for error in form.zip_code.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.procedure_code.id_for_label }}">CPT Code</label>
+            {{ form.procedure_code }}
+            {% if form.procedure_code.errors %}
+            <ul class="errorlist">
+                {% for error in form.procedure_code.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Calculate Rate</button>
+    </form>
+</div>
+
+{% if result %}
+<div class="results-section">
+    <h2>Rate Calculation Results</h2>
+    <div class="results-grid">
+        <div class="results-column">
+            <h3>Location Information</h3>
+            <table class="results-table">
+                <tr>
+                    <th>ZIP Code</th>
+                    <td>{{ result.zip_code }}</td>
+                </tr>
+                <tr>
+                    <th>State</th>
+                    <td>{{ result.state_name }} ({{ result.state_code }})</td>
+                </tr>
+                <tr>
+                    <th>Fee Schedule Area</th>
+                    <td>{{ result.fee_schedule_area }}</td>
+                </tr>
+                <tr>
+                    <th>Locality</th>
+                    <td>{{ result.locality_name }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="results-column">
+            <h3>Procedure Information</h3>
+            <table class="results-table">
+                <tr>
+                    <th>CPT Code</th>
+                    <td>{{ result.procedure_code }}</td>
+                </tr>
+                <tr>
+                    <th>Work RVU</th>
+                    <td>{{ result.work_rvu }}</td>
+                </tr>
+                <tr>
+                    <th>Practice Expense RVU</th>
+                    <td>{{ result.practice_expense_rvu }}</td>
+                </tr>
+                <tr>
+                    <th>Malpractice RVU</th>
+                    <td>{{ result.malpractice_rvu }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="results-grid">
+        <div class="results-column">
+            <h3>Geographic Practice Cost Indices (GPCI)</h3>
+            <table class="results-table">
+                <tr>
+                    <th>Work GPCI</th>
+                    <td>{{ result.work_gpci }}</td>
+                </tr>
+                <tr>
+                    <th>Practice Expense GPCI</th>
+                    <td>{{ result.pe_gpci }}</td>
+                </tr>
+                <tr>
+                    <th>Malpractice GPCI</th>
+                    <td>{{ result.mp_gpci }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="results-column">
+            <h3>Conversion Factor</h3>
+            <table class="results-table">
+                <tr>
+                    <th>2025 Conversion Factor</th>
+                    <td>${{ result.conversion_factor }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="results-summary">
+        <h3>Allowed Amount: ${{ result.allowed_amount|floatformat:2 }}</h3>
+    </div>
+</div>
+{% endif %}

@@ -1,6 +1,7 @@
 # Medicare Rate Lookup Tool
 
 A Django-based tool for looking up Medicare rates based on ZIP codes and CPT codes.
+It also supports a Workers' Compensation fee schedule lookup by state and CPT code.
 
 ## Setup
 

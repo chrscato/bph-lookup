@@ -27,6 +27,23 @@ header h1 {
     color: #007bff;
 }
 
+.nav-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
 main {
     min-height: calc(100vh - 200px);
     padding: 2rem 0;
