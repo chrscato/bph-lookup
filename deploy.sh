@@ -79,7 +79,7 @@ if [ -n "$(git diff --staged)" ]; then
     check_status "Local commit created"
 fi
 
-git push origin main
+git push origin master
 check_status "Code pushed to repository"
 
 # Step 3: Deploy on VM
@@ -101,7 +101,7 @@ cd $REMOTE_DIR
 
 # Pull latest code
 echo -e "${BLUE}📥 Pulling latest code...${NC}"
-git pull origin main
+git pull origin master
 
 # Create virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
