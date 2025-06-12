@@ -121,9 +121,11 @@ pip install -r requirements.txt
 echo -e "${BLUE}🗃️  Running Django setup...${NC}"
 source venv/bin/activate
 cd bph_lookup
-python manage.py makemigrations
-python manage.py migrate
-python manage.py collectstatic --noinput
+
+# Skip migrations for now - just collect static files
+echo "Skipping migrations due to existing database..."
+python manage.py collectstatic --noinput --clear
+
 cd ..
 
 # Check if service exists, if not create it
