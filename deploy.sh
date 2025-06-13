@@ -103,7 +103,8 @@ cd $REMOTE_DIR
 
 # Pull latest code
 echo -e "${BLUE}📥 Pulling latest code...${NC}"
-git pull --force origin $(git branch --show-current)
+git clean -f bph_lookup/core/migrations/
+git pull origin $(git branch --show-current)
 
 # Create virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
