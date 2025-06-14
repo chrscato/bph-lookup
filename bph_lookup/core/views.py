@@ -76,21 +76,23 @@ def workers_comp_lookup(request, template_name="core/workers_comp_rate_lookup.ht
             procedure_code = form.cleaned_data["procedure_code"]
 
             try:
-                rate = (
-                    FeeScheduleRate.objects
-                    .select_related("fee_schedule", "procedure_code", "region")
-                    .filter(
-                        fee_schedule__state=state,
-                        procedure_code__procedure_code=procedure_code,
-                    )
-                    .order_by("-fee_schedule__effective_date")
-                    .first()
-                )
-                if rate:
-                    context["rate"] = rate
-                    messages.success(request, "Rate lookup completed successfully.")
-                else:
-                    messages.warning(request, "No results found for the given state and procedure code.")
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT procedure_code, modifier, region_id, place_of_service, 
+                               service_type, rate_unit, rate 
+                        FROM fee_schedule_rate 
+                        WHERE procedure_code = %s AND state = %s
+                    """, [procedure_code, state])
+                    
+                    columns = [col[0] for col in cursor.description]
+                    results = cursor.fetchall()
+                    
+                    if results:
+                        rates = [dict(zip(columns, row)) for row in results]
+                        context["rates"] = rates
+                        messages.success(request, "Rate lookup completed successfully.")
+                    else:
+                        messages.warning(request, "No results found for the given state and procedure code.")
             except Exception as e:
                 messages.error(request, f"Error retrieving rate: {str(e)}")
         else:

@@ -1,5 +1,6 @@
 from django import forms
 from django.core.validators import RegexValidator
+from django.db import connection
 from .models import State
 
 class MedicareRateLookupForm(forms.Form):
@@ -55,8 +56,8 @@ class MedicareRateLookupForm(forms.Form):
 class WorkersCompRateLookupForm(forms.Form):
     """Lookup workers' compensation fee schedule rates by state and CPT code."""
 
-    state = forms.ModelChoiceField(
-        queryset=State.objects.all(),
+    state = forms.ChoiceField(
+        choices=[],  # Will be populated in __init__
         required=True,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -78,6 +79,13 @@ class WorkersCompRateLookupForm(forms.Form):
             'pattern': '[0-9]{5}'
         })
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT state FROM fee_schedule_rate ORDER BY state")
+            states = cursor.fetchall()
+            self.fields['state'].choices = [(state[0], state[0]) for state in states]
 
     def clean_procedure_code(self):
         procedure_code = self.cleaned_data['procedure_code']

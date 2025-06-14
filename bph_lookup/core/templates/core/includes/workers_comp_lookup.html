@@ -35,34 +35,34 @@
     </form>
 </div>
 
-{% if rate %}
+{% if rates %}
 <div class="results-section">
-    <h2>Fee Schedule Rate</h2>
+    <h2>Fee Schedule Rates</h2>
     <table class="results-table">
-        <tr>
-            <th>State</th>
-            <td>{{ rate.fee_schedule.state.state_name }} ({{ rate.fee_schedule.state.state_code }})</td>
-        </tr>
-        <tr>
-            <th>Procedure Code</th>
-            <td>{{ rate.procedure_code.procedure_code }}</td>
-        </tr>
-        <tr>
-            <th>Description</th>
-            <td>{{ rate.procedure_code.description }}</td>
-        </tr>
-        <tr>
-            <th>Region</th>
-            <td>{{ rate.region.region_name }}</td>
-        </tr>
-        <tr>
-            <th>Rate</th>
-            <td>${{ rate.rate }}</td>
-        </tr>
-        <tr>
-            <th>Unit</th>
-            <td>{{ rate.rate_unit }}</td>
-        </tr>
+        <thead>
+            <tr>
+                <th>Procedure Code</th>
+                <th>Modifier</th>
+                <th>Region ID</th>
+                <th>Place of Service</th>
+                <th>Service Type</th>
+                <th>Rate Unit</th>
+                <th>Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rate in rates %}
+            <tr>
+                <td>{{ rate.procedure_code }}</td>
+                <td>{{ rate.modifier|default:"-" }}</td>
+                <td>{{ rate.region_id|default:"-" }}</td>
+                <td>{{ rate.place_of_service|default:"-" }}</td>
+                <td>{{ rate.service_type|default:"-" }}</td>
+                <td>{{ rate.rate_unit }}</td>
+                <td>${{ rate.rate }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </div>
 {% endif %}
